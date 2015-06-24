@@ -1,0 +1,2 @@
+# PromiseEmitter
+EventEmitter with promise
