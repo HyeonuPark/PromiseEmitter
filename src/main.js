@@ -1,11 +1,12 @@
 function PromiseEmitter() {
     this.chain = [];
+    this.context = {};
 }
 
 PromiseEmitter.prototype.then = function then(resolve, reject) {
     this.chain.push({
-        resolve : resolve,
-        reject : reject
+        resolve : resolve.bind(this.context),
+        reject : reject.bind(this.context)
     });
     return this;
 };
