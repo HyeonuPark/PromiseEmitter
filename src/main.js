@@ -21,3 +21,5 @@ PromiseEmitter.prototype.emit = function emit(event) {
     });
     return promise;
 };
+
+module.exports = PromiseEmitter;
