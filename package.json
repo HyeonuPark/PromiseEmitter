@@ -1,0 +1,23 @@
+{
+  "name": "promise-emitter",
+  "version": "1.0.0",
+  "description": "EventEmitter with promise",
+  "main": "src/main.js",
+  "scripts": {
+    "test": "node test/main"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/HyeonuPark/PromiseEmitter.git"
+  },
+  "keywords": [
+    "event",
+    "promise"
+  ],
+  "author": "HyeonuPark",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/HyeonuPark/PromiseEmitter/issues"
+  },
+  "homepage": "https://github.com/HyeonuPark/PromiseEmitter#readme"
+}
