@@ -1,26 +1,53 @@
-function PromiseEmitter() {
-    this.chain = [];
-    this.context = {};
+function deepCheckCondition(target, condition) {
+    if (condition && typeof condition.some === 'function') {
+        return condition.some((elem) => deepCheckCondition(target, elem));
+    } else if (typeof condition === 'object' && typeof target === 'object') {
+        return Object.keys(condition).every((key) => deepCheckCondition(target[key], condition[key]));
+    } else return target === condition;
 }
 
-PromiseEmitter.prototype.then = function then(resolve, reject) {
-    this.chain.push({
-        resolve : resolve.bind(this.context),
-        reject : reject.bind(this.context)
-    });
-    return this;
-};
+export class PromiseEmitter {
 
-PromiseEmitter.prototype.catch = function(reject) {
-    return this.then(null, reject);
-};
+    constructor(eventEmitter, eventName) {
 
-PromiseEmitter.prototype.emit = function emit(event) {
-    var promise = Promise.resolve(event);
-    this.chain.forEach(function(each) {
-        promise = promise.then(each.resolve, each.reject);
-    });
-    return promise;
-};
+        if (eventEmitter && typeof eventEmitter.on === 'function' && typeof eventEmitter.emit === 'function' &&
+            eventName && typeof eventName === 'string') {
 
-module.exports = PromiseEmitter;
+            eventEmitter.on(eventName, (data) => process.nextTick(() => this.emit(data)));
+        }
+
+        this.listeners = [];
+    }
+
+    emit(data) {
+        const promisedData = Promise.resolve(data);
+        this.listeners.forEach((each) => each(promisedData));
+        return this;
+    }
+
+    then(onSuccess, onError) {
+        let nextPromiseEmitter = new PromiseEmitter;
+        this.listeners.push((data) => process.nextTick(nextPromiseEmitter.emit(data.then(onSuccess, onError))));
+        return nextPromiseEmitter;
+    }
+
+    catch(onError) {
+        return this.then(null, onError);
+    }
+
+    when(condition) {
+        let nextPromiseEmitter = new PromiseEmitter;
+        this.listeners.push((promisedData) => promisedData.then((data) => {
+            if (deepCheckCondition(data, condition)) nextPromiseEmitter.emit(data);
+        }));
+        return nextPromiseEmitter;
+    }
+
+    except(condition) {
+        let nextPromiseEmitter = new PromiseEmitter;
+        this.listeners.push((promisedData) => promisedData.then((data) => {
+            if (!deepCheckCondition(data, condition)) nextPromiseEmitter.emit(data);
+        }));
+        return nextPromiseEmitter;
+    }
+}
