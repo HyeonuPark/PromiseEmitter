@@ -25,8 +25,8 @@ export class PromiseEmitter {
         return this;
     }
 
-    then(onSuccess, onError) {
-        let nextPromiseEmitter = new PromiseEmitter;
+    then(onSuccess, onError, pipeTo) {
+        let nextPromiseEmitter = (pipeTo && pipeTo instanceof PromiseEmitter) ? pipeTo : new PromiseEmitter;
         this.listeners.push((data) => process.nextTick(nextPromiseEmitter.emit(data.then(onSuccess, onError))));
         return nextPromiseEmitter;
     }
@@ -35,16 +35,16 @@ export class PromiseEmitter {
         return this.then(null, onError);
     }
 
-    when(condition) {
-        let nextPromiseEmitter = new PromiseEmitter;
+    when(conditio, pipeTo) {
+        let nextPromiseEmitter = (pipeTo && pipeTo instanceof PromiseEmitter) ? pipeTo : new PromiseEmitter;
         this.listeners.push((promisedData) => promisedData.then((data) => {
             if (deepCheckCondition(data, condition)) nextPromiseEmitter.emit(data);
         }));
         return nextPromiseEmitter;
     }
 
-    except(condition) {
-        let nextPromiseEmitter = new PromiseEmitter;
+    except(condition, pipeTo) {
+        let nextPromiseEmitter = (pipeTo && pipeTo instanceof PromiseEmitter) ? pipeTo : new PromiseEmitter;
         this.listeners.push((promisedData) => promisedData.then((data) => {
             if (!deepCheckCondition(data, condition)) nextPromiseEmitter.emit(data);
         }));
