@@ -31,8 +31,8 @@ export class PromiseEmitter {
         return nextPromiseEmitter;
     }
 
-    catch(onError) {
-        return this.then(null, onError);
+    catch(onError, pipeTo) {
+        return this.then(null, onError, pipeTo);
     }
 
     when(conditio, pipeTo) {
